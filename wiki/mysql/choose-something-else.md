@@ -119,8 +119,7 @@ asking MySQL to modify data - my favourite example being a fat-fingered
 of the rows in the table to be affected, instead of one row, because of
 implicit string-to-integer conversions.
 
-... against loss: hoo boy. MySQL, out of the box, gives you three approaches
-to [backups](http://dev.mysql.com/doc/refman/5.5/en/backup-methods.html):
+... against loss: hoo boy. Backup is part of MySQL's enterprise feature differentiation.  As a non-paying community user,your [choices are](http://dev.mysql.com/doc/refman/5.5/en/backup-methods.html):
 
 * Take "blind" filesystem backups with `tar` or `rsync`. Unless you
   meticulously lock tables or make the database read-only for the duration,
@@ -132,10 +131,9 @@ to [backups](http://dev.mysql.com/doc/refman/5.5/en/backup-methods.html):
   badly by default. (Binary logging is also the basis of MySQL's replication
   system.)
 
-If neither of these are sufficient, you're left with purchasing [a backup tool
-from
-Oracle](http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_mysql_enterprise_backup)
-or from one of the third-party MySQL vendors.
+The other options are to purchase an 
+[Enterprise Subscription](http://dev.mysql.com/doc/refman/5.5/en/glossary.html#glos_mysql_enterprise_backup) from Oracle,
+or install a third party tool such as [Percona's Xtrabackup](http://www.percona.com/doc/percona-xtrabackup/).
 
 Like many of MySQL's features, the binary logging feature is
 [too](http://dev.mysql.com/doc/refman/5.5/en/binary-log.html)
@@ -266,28 +264,22 @@ counterintuitive effects, and the documentation provides very little advice
 for choosing settings. Tuning relies on the administrator's personal
 experience, blog articles of varying quality, and consultants.
 
-* The MySQL query cache defaults to a non-zero size in some commonly-installed
+* <strike>The MySQL query cache defaults to a non-zero size in some commonly-installed
   configurations. However, the larger the cache, the slower writes proceed:
   invalidating cache entries that include the tables modified by a query means
   considering every entry in the cache. This cache also uses MySQL's LRU
   implementation, which has its own performance problems during eviction that
-  get worse with larger cache sizes.
-* Memory-management settings, including `key_buffer_size` and `innodb_buffer_pool_size`,
-  have non-linear relationships with performance. The [standard](http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/)
-  [advice](http://www.mysqlperformanceblog.com/2007/11/01/innodb-performance-optimization-basics/) advises
-  making whichever value you care about more to a large value, but this can be
-  counterproductive if the related data is larger than the pool can hold:
-  MySQL is once again bad at discarding old buffer pages when the buffer is
-  exhausted, leading to dramatic slowdowns when query load reaches a certain
-  point.
-    * This also affects filesystem tuning settings such as `table_open_cache`.
-* InnoDB, out of the box, comes configured to use one large (and automatically
+  get worse with larger cache sizes.</strike>  The query cache is officially disabled-by-default in MySQL 5.6,
+  but with 1M allocated to it so that it 'works as soon as it is enabled'.
+* Some memory-management settings, such as the MyISAM `key_buffer_size` do not scale very well
+  as the size is increased.  MySQL also does not offer parallel query execution.
+* <strike>InnoDB, out of the box, comes configured to use one large (and automatically
   growing) tablespace file for all tables, complicating backups and storage
   management. This is fine for trivial databases, but MySQL provides no tools
   (aside from `DROP TABLE` and reloading the data from an SQL dump) for
   transplanting a table to another tablespace, and provides no tools (aside
   from a filesystem-level `rm`, and reloading _all_ InnoDB data from an SQL
-  dump) for reclaiming empty space in a tablespace file.
+  dump) for reclaiming empty space in a tablespace file.</strike> Fixed in MySQL 5.6.
 * MySQL itself provides very few tools to manage storage; tasks like storing
   large or infrequently-accessed tables and databases on dedicated filesystems
   must be done on the filesystem, with MySQL shut down.
