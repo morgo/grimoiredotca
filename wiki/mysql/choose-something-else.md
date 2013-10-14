@@ -126,9 +126,6 @@ to [backups](http://dev.mysql.com/doc/refman/5.5/en/backup-methods.html):
   meticulously lock tables or make the database read-only for the duration,
   this produces a backup that requires crash recovery before it will be
   usable, and can produce an inconsistent database.
-    * This can bite quite hard if you use InnoDB, as InnoDB crash recovery
-      takes time proportional to both the number of InnoDB tables and the
-      total size of InnoDB tables, with a large constant.
 * Dump to SQL with `mysqldump`: slow, relatively large backups, and
   non-incremental.
 * Archive binary logs: fragile, complex, over-configurable, and configured
